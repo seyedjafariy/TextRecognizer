@@ -36,6 +36,8 @@ object BlocksRenderer {
     private const val IMAGE_ROTATION_LAND_RIGHT = 90
     private const val IMAGE_ROTATION_LAND_LEFT = 270
 
+    private const val BOX_ANIMATION_DURATION = 200L
+
     fun drawBlocks(
         blocksViewGroup: ViewGroup,
         imageSize: Size,
@@ -51,7 +53,26 @@ object BlocksRenderer {
         //we also have to multiply them by the scale to match the size of the view to the taken image
         val ratio = getRatio(parentViewSize, imageSize, imageRotation)
 
-        blocksViewGroup.removeAllViews()
+        for (view in blocksViewGroup.children.toList()) {
+            view as ImageView
+
+            val text = view.getTag(R.id.foundTextTag) as? String
+
+            if (text == null) {
+                blocksViewGroup.removeView(view)
+                continue
+            }
+
+            val updatedBlock = textBlocks.find { it.text.replace(" ", "") == text.replace(" ", "") }
+
+            if (updatedBlock == null) {
+                blocksViewGroup.removeView(view)
+            } else {
+                view.setTag(R.id.foundBlockTag, updatedBlock)
+                translateView(view, updatedBlock, imageRotation, ratio)
+                textBlocks.remove(updatedBlock)
+            }
+        }
 
         textBlocks.forEach {
             val image = AppCompatImageView(blocksViewGroup.context).apply {
@@ -78,6 +99,69 @@ object BlocksRenderer {
                 viewSize.height
             )
         }
+    }
+
+    private fun translateView(
+        view: ImageView,
+        newBlock: FirebaseVisionText.TextBlock,
+        imageRotation: Int,
+        ratio: Ratio
+    ) {
+        val oldAnimator = view.getTag(R.id.foundTextAnimationTag) as? AnimatorSet
+        oldAnimator?.cancel()
+
+        val rect = newBlock.boundingBox!!.toRectF()
+
+        val viewSize = getViewSize(rect, ratio, imageRotation)
+        val viewCoordinate = getViewCoordinate(rect, ratio, imageRotation)
+
+        val xAnimator = ObjectAnimator.ofFloat(
+            view,
+            "translationX",
+            view.x,
+            viewCoordinate.x
+        ).apply {
+            duration = BOX_ANIMATION_DURATION
+            interpolator = AccelerateDecelerateInterpolator()
+        }
+
+        val yAnimator = ObjectAnimator.ofFloat(
+            view,
+            "translationY",
+            view.y,
+            viewCoordinate.y
+        ).apply {
+            duration = BOX_ANIMATION_DURATION
+            interpolator = AccelerateDecelerateInterpolator()
+        }
+
+        val widthAnimator = ValueAnimator.ofInt(view.width, viewSize.width).apply {
+            addUpdateListener { valueAnimator ->
+                view.updateLayoutParams {
+                    width = valueAnimator.animatedValue as Int
+                }
+            }
+            interpolator = AccelerateDecelerateInterpolator()
+            duration = BOX_ANIMATION_DURATION
+        }
+
+        val heightAnimator = ValueAnimator.ofInt(view.height, viewSize.height).apply {
+            addUpdateListener { valueAnimator ->
+                view.updateLayoutParams {
+                    height = valueAnimator.animatedValue as Int
+                }
+            }
+            interpolator = AccelerateDecelerateInterpolator()
+            duration = BOX_ANIMATION_DURATION
+        }
+
+        val animation = AnimatorSet().apply {
+            playTogether(xAnimator, yAnimator, widthAnimator, heightAnimator)
+        }
+
+        animation.start()
+
+        view.setTag(R.id.foundTextAnimationTag, animation)
     }
 
     private fun getRatio(parentSize: Size, imageSize: Size, imageRotation: Int): Ratio =
