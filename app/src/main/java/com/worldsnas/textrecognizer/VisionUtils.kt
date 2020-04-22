@@ -1,6 +1,7 @@
 package com.worldsnas.textrecognizer
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import androidx.camera.core.ImageProxy
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
@@ -22,3 +23,6 @@ fun getFirebaseRotation(rotationCompensation: Int): Int =
             FirebaseVisionImageMetadata.ROTATION_0
         }
     }
+
+fun Bitmap.createVisionImage(): FirebaseVisionImage =
+    FirebaseVisionImage.fromBitmap(this)

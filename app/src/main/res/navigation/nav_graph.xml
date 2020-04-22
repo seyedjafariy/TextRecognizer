@@ -3,11 +3,27 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:id="@+id/nav_graph"
-	app:startDestination="@id/FirstFragment">
+	app:startDestination="@id/PreviewFragment">
 
 	<fragment
-		android:id="@+id/FirstFragment"
+		android:id="@+id/PreviewFragment"
 		android:name="com.worldsnas.textrecognizer.PreviewFragment"
-		android:label="@string/first_fragment_label"
-		tools:layout="@layout/fragment_preview"/>
+		tools:layout="@layout/fragment_preview">
+		<action
+			android:id="@+id/action_PreviewFragment_to_CapturedImageFragment"
+			app:destination="@id/CapturedImageFragment" />
+	</fragment>
+
+	<fragment
+		android:id="@+id/CapturedImageFragment"
+		android:name="com.worldsnas.textrecognizer.CapturedImageFragment"
+		tools:layout="@layout/fragment_captured_image">
+
+		<action
+			android:id="@+id/action_CapturedImageFragment_to_PreviewFragment"
+			app:destination="@id/PreviewFragment" />
+		<argument
+			android:name="capture"
+			app:argType="com.worldsnas.textrecognizer.CaptureLocalModel" />
+	</fragment>
 </navigation>

@@ -208,4 +208,7 @@ object BlocksRenderer {
                 y = boundingRect.top * ratio.heightRatio
             )
         }
+
+    fun getImageRotation(imageAddress : String) =
+        ExifInterface(imageAddress).rotationDegrees
 }
