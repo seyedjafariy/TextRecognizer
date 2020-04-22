@@ -1,39 +1,33 @@
 package com.worldsnas.textrecognizer
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuItem
-
 import kotlinx.android.synthetic.main.activity_main.*
+
+const val FLAGS_FULLSCREEN =
+    View.SYSTEM_UI_FLAG_LOW_PROFILE or
+            View.SYSTEM_UI_FLAG_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+
+private const val IMMERSIVE_FLAG_TIMEOUT = 500L
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
-
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
+    override fun onResume() {
+        super.onResume()
+        // Before setting full screen flags, we must wait a bit to let UI settle; otherwise, we may
+        // be trying to set app to immersive mode before it's ready and the flags do not stick
+        nav_host_fragment.postDelayed({
+            nav_host_fragment.systemUiVisibility = FLAGS_FULLSCREEN
+        }, IMMERSIVE_FLAG_TIMEOUT)
     }
 }

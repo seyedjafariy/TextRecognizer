@@ -16,4 +16,8 @@
 
 	<style name="Theme.App.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+	<style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+		<item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+	</style>
+
 </resources>
